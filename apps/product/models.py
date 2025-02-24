@@ -33,6 +33,10 @@ class Product(models.Model):
     def __str__(self):
         return self.title
     
+    def get_first_image(self) -> 'ProductImage':
+        product_image = ProductImage.objects.filter(product=self).first()
+        return product_image.image.url if product_image else None
+    
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.title)
@@ -46,9 +50,29 @@ class Product(models.Model):
     class Meta:
         verbose_name = "Товар"
         verbose_name_plural = "Товары"
-        ordering = ['-created_at']
+        ordering = ['created_at']
         
     
+class ProductImage(models.Model):
+    product = models.ForeignKey(
+        to='Product',
+        on_delete=models.CASCADE,
+        verbose_name="Товар"
+    )
+    image = models.ImageField(
+        upload_to="product/",
+        verbose_name="Изображение"
+    )
+    postion = models.PositiveIntegerField(
+        default=0,
+        blank=True, null=True
+    )
     
+    def __str__(self):
+        return str(self.image.name)
     
+    class Meta:
+        verbose_name = "Изображение"
+        verbose_name_plural = "Изображения"
+        ordering = ['postion',]
     
